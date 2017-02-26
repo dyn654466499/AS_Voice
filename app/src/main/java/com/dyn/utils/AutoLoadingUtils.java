@@ -23,7 +23,7 @@ public class AutoLoadingUtils {
 		saveView = new ArrayList<View>();
 		
 		ImageView image = (ImageView) view.findViewById(R.id.imageView_autoLoading);  
-		image.setBackgroundResource(R.anim.autoloading);  
+		image.setBackgroundResource(R.drawable.autoloading);
         AnimationDrawable anim = (AnimationDrawable) image.getBackground();  
         anim.start();  
         rootView.setOnHierarchyChangeListener(new OnHierarchyChangeListener() {
