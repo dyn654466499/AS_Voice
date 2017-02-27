@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.dyn.voicecontrol"
-    android:versionCode="1"
-    android:versionName="3.1" >
+    android:versionCode="2"
+    android:versionName="2.0" >
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -180,7 +179,8 @@
             <intent-filter>
                 <action android:name="android.intent.action.CAMERA_BUTTON" />
             </intent-filter>
-        </receiver>
+        </receiver>
+
         -->
         <!-- 语音识别对话框 -->
         <activity
