@@ -13,12 +13,12 @@ import com.dyn.voicecontrol.R;
  * @see http://www.cnblogs.com/over140/archive/2013/03/07/2947721.html
  * 
  */
-@SuppressWarnings("deprecation")
+
 public class ProgressWebView extends WebView {
 
 	public interface WebViewListener{
-		public void onReceivedTitle(WebView view, String title);
-		public void onProgressChanged(WebView view, int newProgress);
+		 void onReceivedTitle(WebView view, String title);
+		 void onProgressChanged(WebView view, int newProgress);
 	}
 	
     private ProgressBar progressbar;

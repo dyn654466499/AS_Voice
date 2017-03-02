@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.dyn.voicecontrol"
-        minSdkVersion 8
+        minSdkVersion 11
         targetSdkVersion 21
         compileOptions {
             sourceCompatibility JavaVersion.VERSION_1_7
