@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,10 +19,12 @@ import org.apache.http.util.EncodingUtils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -36,7 +40,11 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.widget.Toast;
 
+import com.dyn.activities.QRCodeCaptureActivity;
+import com.dyn.activities.WebActivity;
 import com.dyn.voicecontrol.R;
+
+import static com.dyn.consts.Constants.WEB_URL;
 
 /**
  * 公共的工具类
@@ -485,5 +493,164 @@ public class CommonUtil {
     public int Px2Dp(Context context, float px) { 
         final float scale = context.getResources().getDisplayMetrics().density; 
         return (int) (px / scale + 0.5f); 
-    } 
+    }
+	
+		//腾讯应用宝
+		private static final String PACKAGE_NAME_YINGYONGBAO = "com.tencent.android.qqdownloader";
+		//百度手机助手
+		private static final String PACKAGE_NAME_BAIDU = "com.baidu.appsearch";
+		//360手机助手
+		private static final String PACKAGE_NAME_360 = "com.qihoo.appstore";
+		//小米应用市场
+		private static final String PACKAGE_NAME_XIAOMI = "com.xiaomi.market";
+		//华为应用市场
+		private static final String PACKAGE_NAME_HUAWEI = "com.huawei.appmarket";
+		//豌豆荚
+		private static final String PACKAGE_NAME_WANDOUJIA = "com.wandoujia.phoenix2";
+
+		/**
+		 * 去评分
+		 */
+		public static void toScore(Context context, String appId) {
+				HashMap<String, String> pkgNames = getLocalMarketApps(context);
+				if (pkgNames != null && pkgNames.size() > 0) {
+					//顺序按照需求来
+					String[] marketNames = {
+							PACKAGE_NAME_BAIDU,
+							PACKAGE_NAME_YINGYONGBAO,
+							PACKAGE_NAME_XIAOMI,
+							PACKAGE_NAME_HUAWEI,
+							PACKAGE_NAME_WANDOUJIA,
+							PACKAGE_NAME_360,
+					};
+					for (int i = 0; i < marketNames.length; i++) {
+						String marketName = marketNames[i];
+						if (pkgNames.containsKey(marketName)) {
+							launchAppDetail(context, context.getPackageName(), pkgNames.get(marketName),appId);
+							return;
+						}
+					}
+					//如果命中不了运营市场,则调起本手机已经安装的市场列表
+					jumpWebMarket(context,appId);
+				} else {
+					jumpWebMarket(context,appId);
+				}
+		}
+
+		private static boolean isAppInstalled(Context context, String packageName) {
+			PackageInfo packageInfo;
+			try {
+				packageInfo = context.getPackageManager().getPackageInfo(packageName, 0);
+			} catch (PackageManager.NameNotFoundException e) {
+				packageInfo = null;
+				e.printStackTrace();
+			}
+			if (packageInfo == null) {
+				//没有安装
+				return false;
+			} else {
+				//已经安装
+				//Log.e("应用市场","name = " + packageInfo.packageName);
+				return true;
+			}
+		}
+
+		/**
+		 * 获取已安装应用商店的包名列表
+		 *
+		 * @param context
+		 * @return
+		 */
+		private static HashMap<String, String> getLocalMarketApps(Context context) {
+			HashMap<String, String> pkgs = new HashMap<String, String>();
+			if (context == null)
+				return pkgs;
+			Intent intent = new Intent();
+			intent.setAction("android.intent.action.MAIN");
+			intent.addCategory("android.intent.category.APP_MARKET");
+			PackageManager pm = context.getPackageManager();
+			List<ResolveInfo> infos = pm.queryIntentActivities(intent, 0);
+			if (infos == null || infos.size() == 0)
+				return pkgs;
+			int size = infos.size();
+			for (int i = 0; i < size; i++) {
+				String pkgName = "";
+				try {
+					ActivityInfo activityInfo = infos.get(i).activityInfo;
+					pkgName = activityInfo.packageName;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if (!TextUtils.isEmpty(pkgName)) {
+					pkgs.put(pkgName, pkgName);
+					//Log.e("应用市场","name = "+pkgName);
+				}
+			}
+			//上述方法获取不到小米和华为应用市场的包名,需要另外判断
+
+			if (isAppInstalled(context, PACKAGE_NAME_XIAOMI)) {
+				pkgs.put(PACKAGE_NAME_XIAOMI, PACKAGE_NAME_XIAOMI);
+			}
+
+			if (isAppInstalled(context, PACKAGE_NAME_HUAWEI)) {
+				pkgs.put(PACKAGE_NAME_HUAWEI, PACKAGE_NAME_HUAWEI);
+			}
+			return pkgs;
+		}
+
+		/**
+		 * 跳转到app详情界面
+		 *
+		 * @param appPkg    App的包名
+		 * @param marketPkg 应用商店包名 ,如果为""则由系统弹出应用商店列表供用户选择,否则调转到目标市场的应用详情界面，某些应用商店可能会失败
+		 */
+		private static void launchAppDetail(Context context, String appPkg, String marketPkg,String appId) {
+			try {
+				if (TextUtils.isEmpty(appPkg))
+					return;
+				Uri uri = Uri.parse("market://details?id=" + appPkg);
+				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+				if (!TextUtils.isEmpty(marketPkg))
+					intent.setPackage(marketPkg);
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(intent);
+			} catch (Exception e) {
+				//如果打开失败,直接跳到应用宝web页面
+				jumpWebMarket(context,appId);
+			}
+		}
+
+		/**
+		 * 跳转到应用宝的web页面
+		 * @param context
+		 * @param appId
+		 */
+		private static void jumpWebMarket(Context context,String appId){
+			String url;
+			if (!TextUtils.isEmpty(appId)) {
+				url = "http://app.qq.com/#id=detail&appid=" + appId;
+			} else {
+				url = "http://app.qq.com/#id=detail&appid=100733732";
+			}
+			Intent intent = new Intent(context,WebActivity.class);
+			intent.putExtra(WEB_URL, url);
+			context.startActivity(intent);
+		}
+
+		/**
+		 * 调起手机上已安装的应用市场列表
+		 */
+		public void openMarketInstalledInPhone(Context context){
+			if(context==null){
+				return;
+			}
+			try {
+				Intent intent = new Intent(Intent.ACTION_VIEW);
+				intent.setData(Uri.parse("market://details?id=" + context.getPackageName()));
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(intent);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 }

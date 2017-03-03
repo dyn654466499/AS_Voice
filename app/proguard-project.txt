@@ -106,7 +106,8 @@
 -dontwarn com.iflytek.pushclient.**
 -dontwarn com.iflytek.psunflower.**
 -dontwarn com.google.protobuf.**
--keep class com.iflytek.**{*;}
+-dontwarn com.iflytek.**
+-keep class com.iflytek.** {*;}
 -keep class assets.**{*;}
 
 -dontwarn android.support.v4.**  

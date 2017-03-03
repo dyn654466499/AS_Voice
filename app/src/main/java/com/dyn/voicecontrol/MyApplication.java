@@ -18,8 +18,9 @@ import com.dyn.utils.UnpackSoUtil;
 import com.iflytek.cloud.SpeechUtility;
 import com.library.decrawso.DecRawso;
 
+import static com.dyn.activities.ListAppsActivity.mHandler;
+
 public class MyApplication extends Application{
-    private Handler mHandler;
     private static final int MSG_WRITE_ERROR = 100;
 	@Override
 	public void onCreate() {
@@ -64,7 +65,6 @@ public class MyApplication extends Application{
 					fos.close();
 				} catch (FileNotFoundException e1) {
 					e1.printStackTrace();
-					mHandler.obtainMessage(MSG_WRITE_ERROR).sendToTarget();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

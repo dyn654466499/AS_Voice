@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 
 import com.dyn.interfaces.Commands;
+import com.dyn.utils.CommonUtil;
 import com.dyn.utils.DataCacheUtils;
 import com.dyn.utils.DialogUtils;
 import com.dyn.voicecontrol.R;
@@ -139,10 +140,11 @@ public class SettingActivity extends BaseActivity{
 			 * 去相应的应用市场进行评价	
 			 */
 			case R.id.button_setting_evaluate:
-				Uri uri = Uri.parse("market://details?id="+getPackageName());  
-				Intent intent = new Intent(Intent.ACTION_VIEW,uri);  
-				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  
-				startActivity(intent); 
+//				Uri uri = Uri.parse("market://details?id="+getPackageName());
+//				Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+//				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//				startActivity(intent);
+				CommonUtil.toScore(this,"");
 				break;
 			/**
 			 * 分享给好友	
